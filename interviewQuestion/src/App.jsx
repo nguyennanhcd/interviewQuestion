@@ -5,9 +5,9 @@ const App = () => {
   const [done, setDone] = useState(false);
   const [counter, setCounter] = useState(10);
   const [isGameStarted, setIsGameStarted] = useState(false);
-  const [allPoints, setAllPoints] = useState([]); // Lưu trữ tất cả các điểm
-  const [clickedPoints, setClickedPoints] = useState([]); // Lưu trữ các điểm đã bị nhấp
-  const [currentIndex, setCurrentIndex] = useState(0); // Trạng thái lưu trữ thứ tự nhấp chuột hiện tại
+  const [allPoints, setAllPoints] = useState([]);
+  const [clickedPoints, setClickedPoints] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     let intervalId;
@@ -31,8 +31,8 @@ const App = () => {
       setCounter(10);
       setPoints(0);
       setDone(false);
-      setCurrentIndex(0); // Reset lại thứ tự nhấp chuột khi khởi động lại
-      setClickedPoints([]); // Reset các điểm đã nhấp
+      setCurrentIndex(0);
+      setClickedPoints([]);
     }
 
     setIsGameStarted(true);
@@ -48,23 +48,22 @@ const App = () => {
       pointsArray.push({ x: randomX, y: randomY, index: i });
     }
 
-    setAllPoints(pointsArray); // Lưu trữ tất cả các điểm
+    setAllPoints(pointsArray);
   };
 
   const handlePointsChange = (e) => {
     const value = Number(e.target.value) || 0;
     setPoints(value);
     generateRandomPoints(value);
-    setCurrentIndex(0); // Reset lại thứ tự nhấp chuột khi số lượng điểm thay đổi
+    setCurrentIndex(0);
   };
 
   const handlePointClick = (index) => {
     if (index === currentIndex) {
       setClickedPoints((prevClickedPoints) => [...prevClickedPoints, index]);
-      setCurrentIndex((prevIndex) => prevIndex + 1); // Tăng chỉ số khi nhấp đúng
+      setCurrentIndex((prevIndex) => prevIndex + 1);
 
       if (currentIndex + 1 === points) {
-        // Kiểm tra nếu tất cả các điểm đã được nhấp
         setDone(true);
         setIsGameStarted(false);
       }
@@ -86,7 +85,9 @@ const App = () => {
     >
       <div>
         {done ? (
-          <h3 style={{ background: "green", display: "inline-block", color: "white" }}>
+          <h3
+            style={{ background: "green", display: "inline-block", color: "white" }}
+          >
             All Cleared
           </h3>
         ) : (
@@ -102,7 +103,14 @@ const App = () => {
             disabled={isGameStarted}
           />
         </div>
-        <div style={{ display: "flex", gap: "20px", alignItems: "center", marginTop: "-10px" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "20px",
+            alignItems: "center",
+            marginTop: "-10px",
+          }}
+        >
           <p>Time: </p>
           <p>{counter}s</p>
         </div>
@@ -119,11 +127,11 @@ const App = () => {
           position: "relative",
         }}
       >
-        {allPoints.map((point) => (
-          !clickedPoints.includes(point.index) && (
+        {allPoints.map((point) =>
+          !clickedPoints.includes(point.index) ? (
             <div
               key={point.index}
-              onClick={() => handlePointClick(point.index)} // Gọi hàm xử lý nhấp chuột khi click vào điểm
+              onClick={() => handlePointClick(point.index)}
               style={{
                 position: "absolute",
                 top: `${point.y}px`,
@@ -141,8 +149,28 @@ const App = () => {
             >
               <p>{point.index + 1}</p>
             </div>
+          ) : (
+            <div
+              key={point.index}
+              style={{
+                position: "absolute",
+                top: `${point.y}px`,
+                left: `${point.x}px`,
+                width: "20px",
+                height: "20px",
+                backgroundColor: "red",
+                borderRadius: "50%",
+                border: "1px solid black",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <p>{point.index + 1}</p>
+            </div>
           )
-        ))}
+        )}
       </div>
     </div>
   );
