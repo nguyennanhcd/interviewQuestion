@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 const App = () => {
   const [points, setPoints] = useState(0);
-  const [done, setDone] = useState(false);
+  const [status, setStatus] = useState("notStarted"); // Replacing done with status
   const [counter, setCounter] = useState(10);
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [allPoints, setAllPoints] = useState([]);
@@ -19,31 +19,43 @@ const App = () => {
     }
 
     if (counter === 0) {
-      setDone(true);
+      if (clickedPoints.length === points) {
+        setStatus("All Cleared");
+      } else {
+        setStatus("You failed");
+      }
       setIsGameStarted(false);
     }
 
     return () => clearInterval(intervalId);
-  }, [isGameStarted, counter]);
+  }, [isGameStarted, counter, clickedPoints, points]);
 
   const handleStartOrRestart = () => {
-    if (done) {
-      setCounter(10);
-      setPoints(0);
-      setDone(false);
-      setCurrentIndex(0);
-      setClickedPoints([]);
-    }
-
+    setCounter(10);
+    setPoints(0);
+    setStatus("notStarted");
+    setCurrentIndex(0);
+    setClickedPoints([]);
     setIsGameStarted(true);
   };
 
   const generateRandomPoints = (numPoints) => {
     const pointsArray = [];
+    const pointSize = 20; // Assuming each point is 20x20 pixels in size
+    const maxX = 818;
+    const maxY = 480;
 
     for (let i = 0; i < numPoints; i++) {
-      const randomX = Math.floor(Math.random() * 818);
-      const randomY = Math.floor(Math.random() * 480);
+      let randomX, randomY, isOverlapping;
+      do {
+        randomX = Math.floor(Math.random() * (maxX - pointSize));
+        randomY = Math.floor(Math.random() * (maxY - pointSize));
+        isOverlapping = pointsArray.some(
+          (point) =>
+            Math.abs(point.x - randomX) < pointSize &&
+            Math.abs(point.y - randomY) < pointSize
+        );
+      } while (isOverlapping);
 
       pointsArray.push({ x: randomX, y: randomY, index: i });
     }
@@ -59,12 +71,14 @@ const App = () => {
   };
 
   const handlePointClick = (index) => {
+    if (!isGameStarted) {
+      setIsGameStarted(true)  
+    }
     if (index === currentIndex) {
       setClickedPoints((prevClickedPoints) => [...prevClickedPoints, index]);
       setCurrentIndex((prevIndex) => prevIndex + 1);
-
       if (currentIndex + 1 === points) {
-        setDone(true);
+        setStatus("All Cleared");
         setIsGameStarted(false);
       }
     }
@@ -84,11 +98,17 @@ const App = () => {
       }}
     >
       <div>
-        {done ? (
+        {status === "All Cleared" ? (
           <h3
             style={{ background: "green", display: "inline-block", color: "white" }}
           >
             All Cleared
+          </h3>
+        ) : status === "You failed" ? (
+          <h3
+            style={{ background: "red", display: "inline-block", color: "white" }}
+          >
+            You failed
           </h3>
         ) : (
           <h3>Let's play</h3>
@@ -115,7 +135,7 @@ const App = () => {
           <p>{counter}s</p>
         </div>
         <button onClick={handleStartOrRestart}>
-          {isGameStarted || done ? "Restart" : "Start"}
+          {isGameStarted || status !== "notStarted" ? "Restart" : "Start"}
         </button>
       </div>
       <div
